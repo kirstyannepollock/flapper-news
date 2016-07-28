@@ -8,6 +8,9 @@ var jQueryMin = jQueryBase + 'jquery.min.js';
 var angularBase = './bower_components/angular/';
 var angularMin = angularBase + 'angular.min.js';
 
+var angularUiRouterBase = './bower_components/angular-ui-router/release/';
+var angularUi = angularUiRouterBase + 'angular-ui-router.js';
+
 var bootstrapBase = './bower_components/bootstrap/';
 var bootstrapDist = bootstrapBase + 'dist/**/*';
 
@@ -61,4 +64,11 @@ gulp.task( 'angular', function()
 });
 
  
- gulp.task( 'vendor', ['jquery', 'angular'] );
+gulp.task( 'angular-ui-router', function() 
+{
+  return  gulp.src(angularUi)
+            .pipe(gulp.dest(vendorDest) );
+});
+
+gulp.task( 'angular', ['angular', 'angular-ui-router'] );
+gulp.task( 'vendor', ['jquery', 'angular', 'bootstrap'] );

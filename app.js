@@ -1,7 +1,8 @@
 
 //https://thinkster.io/angular-rails#angular-services
 
-angular.module('flapperNews', [])
+//ui-router is newer and provides more flexibility and features than ngRoute. 
+angular.module('flapperNews', ['ui.router'])
   .factory('posts', postFactory)
   .controller('MainController', ['$scope', 'posts', mainController]);
 
@@ -15,6 +16,19 @@ function mainController($scope, postFactory) {
   $scope.app.posts = createMockPosts();
   $scope.app.addPost = addMockPost;
   $scope.app.incrementUpvotes = incrementUpvotes;
+}
+
+function stateConfig($stateProvider, $urlRouterProvider){
+  
+  $stateProvider
+    .state('home', 
+      {
+        url: '/home',
+        templateUrl: '/home.html',
+        controller: 'MainController'
+      });
+
+  $urlRouterProvider.otherwise('home');
 }
 
 function postFactory() {
