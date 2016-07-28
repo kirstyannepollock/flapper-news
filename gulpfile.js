@@ -8,6 +8,9 @@ var jQueryMin = jQueryBase + 'jquery.min.js';
 var angularBase = './bower_components/angular/';
 var angularMin = angularBase + 'angular.min.js';
 
+var bootstrapBase = './bower_components/bootstrap/';
+var bootstrapDist = bootstrapBase + 'dist/**/*';
+
 var vendorDest = './vendor' ;
 
 var onError = function(err) 
@@ -37,6 +40,13 @@ var onError = function(err)
 //   gulp.watch( [ sassSrc, jsSrc ], [ 'scripts', 'styles' ] );
 // });
 //==========================================
+
+gulp.task( 'bootstrap', function() 
+{
+  return  gulp.src(bootstrapDist)
+            .pipe(gulp.dest(vendorDest + '/bootstrap') );
+});
+
 
 gulp.task( 'jquery', function() 
 {
