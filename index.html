@@ -8,12 +8,23 @@
 <body ng-app="flapperNews" ng-controller="MainController">
   <!-- order by upvotes descending -->
   <div ng-repeat="post in app.posts | orderBy: '-upvotes'">
-    {{post.title}} - upvotes: {{post.upvotes}}
+    <span ng-click="app.incrementUpvotes(post)">^</span>
+
+    <a ng-show="{{post.link}}" href="{{post.link}}">
+      {post.title}}
+    </a>
+    <span ng-hide="{{post.link}}">
+      {{post.title}}
+    </span>
+    - upvotes: {{post.upvotes}}
+
+    <a href="{{post.link}}">{{post.link}}</a>
   </div>
 
   <!-- setting the model does the data binding -->
-  <form ng-submit="app.addPost(title, app.posts)">    
+  <form ng-submit="app.addPost(title, link, app.posts)">
     <input type="text" ng-model="title"></input>
+    <input type="text" ng-model="link"></input>
     <button type="submit">Post</button>
   </form>
 
