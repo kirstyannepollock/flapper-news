@@ -5,10 +5,17 @@
 
 </head>
 
-<body ng-app="flapperNews" ng-controller="MainCtrl">
-  <div ng-repeat="post in posts">
-    {{post}}
+<body ng-app="flapperNews" ng-controller="MainController">
+  <!-- order by upvotes descending -->
+  <div ng-repeat="post in app.posts | orderBy: '-upvotes'">
+    {{post.title}} - upvotes: {{post.upvotes}}
   </div>
+
+  <!-- setting the model does the data binding -->
+  <form ng-submit="app.addPost(title, app.posts)">    
+    <input type="text" ng-model="title"></input>
+    <button type="submit">Post</button>
+  </form>
 
   <script src="vendor/angular.min.js"></script>
   <script src="app.js"></script>
