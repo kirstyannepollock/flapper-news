@@ -4,10 +4,10 @@
 //ui-router is newer and provides more flexibility and features than ngRoute. 
 angular.module('flapperNews', ['ui.router'])
 
-  .config(['$stateProvider', '$urlRouterProvider', stateConfig])  
+  .config(['$stateProvider', '$urlRouterProvider', stateConfig])
   // inject the root url for the api.
   // ****!!!!! So THIS is how you inject parameters to named functions !!!****
-  .constant('apiBaseUrl','http://localhost:3001')
+  .constant('apiBaseUrl', 'http://localhost:3001')
   // create the data provider as 'postDataService' so we can inject it downstream
   .factory('postDataService', ['$http', 'apiBaseUrl', postDataServiceImplementation])
   // MainController depends upon the data service (factory) 
@@ -15,7 +15,7 @@ angular.module('flapperNews', ['ui.router'])
   // PostController depends on the data service (factory) 
   // AND the 'post' Promise set up in the state controller to 
   // load the individual post.
-  .controller('PostsController', ['$scope', 'postDataService', 'post', postsController]);
+  .controller('PostsController', ['$log', '$scope', 'postDataService', 'post', postsController]);
 
 
 //*****************
@@ -24,23 +24,29 @@ angular.module('flapperNews', ['ui.router'])
 // decoupling concerns, I guess.
 //*****************
 
-function postsController($scope, postDataService, post) {
+function postsController($log, $scope, postDataService, post) {
   // holds all fns and vars that can be used in pages
   $scope.app = {};
 
   // use the injected Promise to grab the post and associated information
   $scope.app.post = post;
 
-  // I find this a tad hinky (the success part), but I'll sort it out
-  // when I have more experience
   $scope.app.addComment = function (postId, body) {
-    addComment(postId, body, postDataService)
-      .success(function (comment) {
-        $scope.app.post.comments.push(comment);
-      });
+    // on success, update our local data
+    addComment(postId, body, postDataService, function (comment) {
+      $scope.app.post.comments.push(comment);
+    });
+
 
     //blank these off so the UI is cleared
     $scope.body = '';
+  };
+
+  $scope.app.incrementCommentUpVotes = function (postId, comment) {
+    // //temp
+    // comment = $scope.app.comment;
+    // var id = comment._id;
+    postDataService.upVote(postId, comment);
   };
 }
 
@@ -111,7 +117,7 @@ function postDataServiceImplementation($http, apiBaseUrl) {
   var o = { posts: [] };
 
   createPostsMethods($http, apiBaseUrl, o);
-  createCommentMethods($http,apiBaseUrl,  o);
+  createCommentMethods($http, apiBaseUrl, o);
 
   return o;
 };
@@ -119,7 +125,17 @@ function postDataServiceImplementation($http, apiBaseUrl) {
 function createCommentMethods($http, apiBaseUrl, o) {
   // Add
   o.addComment = function (postId, comment) {
-    return $http.post(apiBaseUrl + "/" + postId + "/comments");
+    return $http.post(apiBaseUrl + '/posts/' + postId + "/comments", comment);
+  };
+
+  // Upvote (Comment)
+  o.upVoteComment = function (postId, comment) {
+    var f = comment;
+
+    return $http.post(apiBaseUrl + '/posts/' + postId + ' /comments/' + comment._id, 'vote-up')
+      .success(function (data) {
+        comment.upvotes += 1;
+      });
   };
 }
 
@@ -161,6 +177,7 @@ function createPostsMethods($http, apiBaseUrl, o) {
         post.upvotes += 1;
       });
   };
+
 }
 
 //**** these deal purely with the service, however it is implemented
@@ -174,13 +191,17 @@ function addPost(title, link, postDataService) {
   });
 }
 
-function addComment(postId, body, postDataService) {
+function addComment(postId, body, postDataService, success) {
   if (body === '') { return; }
-  postDataService.addComment({
-    body: body,
-    author: 'user',
-    upvotes: 0
-  });
+
+  var comment = {
+      body: body,
+      author: 'user',
+      upvotes: 0
+    };
+    
+  postDataService.addComment(postId,comment)
+    .success(success(comment));
 }
 
 
