@@ -3,9 +3,13 @@
 
 //ui-router is newer and provides more flexibility and features than ngRoute. 
 angular.module('flapperNews', ['ui.router'])
-  .config(['$stateProvider', '$urlRouterProvider', stateConfig])
+
+  .config(['$stateProvider', '$urlRouterProvider', stateConfig])  
+  // inject the root url for the api.
+  // ****!!!!! So THIS is how you inject parameters to named functions !!!****
+  .constant('apiBaseUrl','http://localhost:3001')
   // create the data provider as 'postDataService' so we can inject it downstream
-  .factory('postDataService', ['$http', postDataServiceImplementation])
+  .factory('postDataService', ['$http', 'apiBaseUrl', postDataServiceImplementation])
   // MainController depends upon the data service (factory) 
   .controller('MainController', ['$scope', 'postDataService', mainController])
   // PostController depends on the data service (factory) 
@@ -13,17 +17,30 @@ angular.module('flapperNews', ['ui.router'])
   // load the individual post.
   .controller('PostsController', ['$scope', 'postDataService', 'post', postsController]);
 
-function postsController($scope, postFactory, post) {
+
+//*****************
+// My idea right now is that controller know about scope, but not 
+// data services or their access functions. It's a foreboding of
+// decoupling concerns, I guess.
+//*****************
+
+function postsController($scope, postDataService, post) {
   // holds all fns and vars that can be used in pages
   $scope.app = {};
 
   // use the injected Promise to grab the post and associated information
   $scope.app.post = post;
-  $scope.app.addComment = function (post, body) {
-    addComment(post, body);
 
-    //persist changes back out
-    $scope.body = body;
+  // I find this a tad hinky (the success part), but I'll sort it out
+  // when I have more experience
+  $scope.app.addComment = function (postId, body) {
+    addComment(postId, body, postDataService)
+      .success(function (comment) {
+        $scope.app.post.comments.push(comment);
+      });
+
+    //blank these off so the UI is cleared
+    $scope.body = '';
   };
 }
 
@@ -54,7 +71,7 @@ function stateConfig($stateProvider, $urlRouterProvider) {
     {
       // Ensure that anytime our home state is entered, we will automatically 
       // query all posts from our backend before the state actually finishes loading.
-      // 'postDataService' refers to the postFactory dependency we injected in the 
+      // 'postDataService' refers to the postDataService dependency we injected in the 
       // app setup.
       resolve: {
         posts: ['postDataService', function (posts) {
@@ -67,11 +84,11 @@ function stateConfig($stateProvider, $urlRouterProvider) {
     })
     .state('postDataService',
     {
-        resolve: {
+      resolve: {
         // use the id from the url and the posts factory we injected
         // at the start to get the single post by id every time
         // we enter the 'postDataService' state.
-        post: ['$stateParams','postDataService', function ($stateParams, posts) {
+        post: ['$stateParams', 'postDataService', function ($stateParams, posts) {
           return posts.get($stateParams.id);
         }]
       },
@@ -83,19 +100,30 @@ function stateConfig($stateProvider, $urlRouterProvider) {
   $urlRouterProvider.otherwise('home');
 }
 
-function postDataServiceImplementation($http) {
+function postDataServiceImplementation($http, apiBaseUrl) {
   // What we're doing here is creating a new object that has an array
-  // property called 'postDataService'. We then return that variable so that our
+  // property called 'posts'. We then return that variable so that our
   // o object essentially becomes exposed to any other Angular module 
   // that cares to inject it. You'll note that we could have simply 
   // exported the posts array directly, however, by exporting an object
   // that contains the posts array we can add new objects and methods 
-  // to our services in the future.
+  // to our services.
   var o = { posts: [] };
 
-  // **TODO: work out how to inject this
-  var apiBaseUrl = 'http://localhost:3001';
+  createPostsMethods($http, apiBaseUrl, o);
+  createCommentMethods($http,apiBaseUrl,  o);
 
+  return o;
+};
+
+function createCommentMethods($http, apiBaseUrl, o) {
+  // Add
+  o.addComment = function (postId, comment) {
+    return $http.post(apiBaseUrl + "/" + postId + "/comments");
+  };
+}
+
+function createPostsMethods($http, apiBaseUrl, o) {
   // Get All Posts
   o.getAll = function () {
     return $http.get(apiBaseUrl + '/posts')
@@ -106,7 +134,7 @@ function postDataServiceImplementation($http) {
 
   // Get single post
   o.get = function (id) {
-    return $http.get(apiBaseUrl + '/posts/'+ id)
+    return $http.get(apiBaseUrl + '/posts/' + id)
       //.then because we are going to do a Promise
       .then(function (response) {
         return response.data;
@@ -125,7 +153,7 @@ function postDataServiceImplementation($http) {
   // Upvote (Post)
   o.upVote = function (post) {
     // The auto MongoDb property is "_id" not "id"
-    // For some reason up-vote/down-vote is a POST rather than a PUT
+    // up-vote/down-vote is a POST rather than a PUT (JSON)
     return $http.post(apiBaseUrl + '/posts/' + post._id + '/vote-up')
       .success(function (data) {
         // this is duplicative, but saves a db fetch, I suppose.
@@ -133,29 +161,26 @@ function postDataServiceImplementation($http) {
         post.upvotes += 1;
       });
   };
+}
 
-  return o;
-};
-
-function addPost(title, link, postFactory) {
+//**** these deal purely with the service, however it is implemented
+function addPost(title, link, postDataService) {
 
   if (!title || title === '') { return; }
 
-  postFactory.create({
+  postDataService.create({
     title: title,
     link: link,
   });
 }
 
-function addComment(post, body) {
+function addComment(postId, body, postDataService) {
   if (body === '') { return; }
-  post.comments.push({
+  postDataService.addComment({
     body: body,
     author: 'user',
     upvotes: 0
   });
-
-  body = '';
 }
 
 
