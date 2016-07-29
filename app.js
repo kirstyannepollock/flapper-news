@@ -28,21 +28,18 @@ function mainController($scope, postFactory) {
   $scope.app = {};
   $scope.app.posts = postFactory.posts;
 
-  $scope.app.addPost = function (title, link, posts) {
+  $scope.app.addPost = function (title, link) {
+    addPost(title, link, postFactory);
 
-    if (!title || title === '') { return; }
-
-    posts.create({
-      title: title,
-      link: link,
-    });
-
+    // blank these off so the UI is cleared
     $scope.title = '';
     $scope.link = '';
   };
 
+  $scope.app.incrementPostUpVotes = function (post) {
+    postFactory.upVote(post);
+  };
 
-  $scope.app.incrementUpvotes = incrementUpvotes;
 }
 
 function stateConfig($stateProvider, $urlRouterProvider) {
@@ -84,6 +81,7 @@ function postFactory($http) {
   // **TODO: work out how to inject this
   var apiBaseUrl = 'http://localhost:3001';
 
+  // Get All
   o.getAll = function () {
     return $http.get(apiBaseUrl + '/posts')
       .success(function (data) {
@@ -91,15 +89,39 @@ function postFactory($http) {
       });
   };
 
+  // Create
   o.create = function (post) {
-    return $http.post(apiBaseUrl + '/posts', post).success(function (data) {
-      o.posts.push(data);
-    });
+    return $http.post(apiBaseUrl + '/posts', post)
+      .success(function (data) {
+        // again, saves a fetch, same issues as below
+        o.posts.push(data);
+      });
+  };
+
+  // Upvote (Post)
+  o.upVote = function (post) {
+    // The auto MongoDb property is "_id" not "id"
+    // For some reason up-vote/down-vote is a POST rather than a PUT
+    return $http.post(apiBaseUrl + '/posts/' + post._id + '/vote-up')
+      .success(function (data) {
+        // this is duplicative, but saves a db fetch, I suppose.
+        // not very multi-user scalable - at least not with consistency..
+        post.upvotes += 1;
+      });
   };
 
   return o;
 };
 
+function addPost(title, link, postFactory) {
+
+  if (!title || title === '') { return; }
+
+  postFactory.create({
+    title: title,
+    link: link,
+  });
+}
 
 function addComment(post, body) {
   if (body === '') { return; }
@@ -112,16 +134,4 @@ function addComment(post, body) {
   body = '';
 }
 
-function incrementUpvotes(item) {
-  item.upvotes++;
-}
-
-function addMockPost(title, link, posts) {
-  if (title == "") { title = "default title"; };
-  var id = posts.length; //temps!!
-  posts.push({ id: id, title: title, link: link, upvotes: 0, comments: [] });
-
-  title = "";
-  link = "";
-}
 

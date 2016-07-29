@@ -26,7 +26,7 @@
   <div ng-repeat="post in app.posts | orderBy: '-upvotes'">
 
     <span class="glyphicon glyphicon-thumbs-up" 
-    ng-click="app.incrementUpvotes(post)">
+    ng-click="app.incrementPostUpVotes(post)">
       {{post.upvotes}}
     </span>
 
@@ -49,7 +49,7 @@
   </div><!-- ng-repeat post -->
 
     <!-- setting the model does the data binding -->
-    <form ng-submit="app.addPost(title, link, app.posts)"
+    <form ng-submit="app.addPost(title, link)"
       style="margin-top:30px;">
       <h3>Add a new post</h1>
       <div class="form-group">
@@ -78,7 +78,7 @@
 
   </script>
 
-  <!-- Posts -->
+  <!-- Posts (details)-->
   <script type="text/ng-template" id="/posts.html">
   <div class="page-header">
     <h3>
@@ -94,7 +94,7 @@
 
   <div ng-repeat="comment in app.post.comments | orderBy:'-upvotes'">
     <span class="glyphicon glyphicon-thumbs-up"
-      ng-click="app.incrementUpvotes(comment)">
+      ng-click="app.incrementCommentUpVotes(comment)">
     </span>
     {{comment.upvotes}} - by {{comment.author}}
     <span style="font-size:20px; margin-left:10px;">
@@ -106,13 +106,13 @@
     style="margin-top:30px;">
     <h3>Add a new comment</h3>
 
-    <div class="form-group">
-      
-      <input type="text"
-      class="form-control"
-      placeholder="Comment"
-      ng-model="body"
-      name=body>
+    <div class="form-group">      
+      <input 
+        type="text"
+        class="form-control"
+        placeholder="Comment"
+        ng-model="body"
+        name=body>
       </input>
     </div>
     <button type="submit" class="btn btn-primary">Post</button>
