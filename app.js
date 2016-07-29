@@ -4,16 +4,21 @@
 //ui-router is newer and provides more flexibility and features than ngRoute. 
 angular.module('flapperNews', ['ui.router'])
   .config(['$stateProvider', '$urlRouterProvider', stateConfig])
-  .factory('posts', ['$http', postFactory])
-  .controller('MainController', ['$scope', 'posts', mainController])
-  .controller('PostsController', ['$scope', '$stateParams', 'posts', postsController]);
+  // create the data provider as 'postDataService' so we can inject it downstream
+  .factory('postDataService', ['$http', postDataServiceImplementation])
+  // MainController depends upon the data service (factory) 
+  .controller('MainController', ['$scope', 'postDataService', mainController])
+  // PostController depends on the data service (factory) 
+  // AND the 'post' Promise set up in the state controller to 
+  // load the individual post.
+  .controller('PostsController', ['$scope', 'postDataService', 'post', postsController]);
 
-function postsController($scope, $stateParams, postFactory) {
+function postsController($scope, postFactory, post) {
   // holds all fns and vars that can be used in pages
   $scope.app = {};
 
-  // set the id route parameter to grab the post and associated information
-  $scope.app.post = postFactory.posts[$stateParams.id];
+  // use the injected Promise to grab the post and associated information
+  $scope.app.post = post;
   $scope.app.addComment = function (post, body) {
     addComment(post, body);
 
@@ -22,14 +27,14 @@ function postsController($scope, $stateParams, postFactory) {
   };
 }
 
-function mainController($scope, postFactory) {
+function mainController($scope, postDataService) {
 
   // holds all fns and vars that can be used in pages
   $scope.app = {};
-  $scope.app.posts = postFactory.posts;
+  $scope.app.posts = postDataService.posts;
 
   $scope.app.addPost = function (title, link) {
-    addPost(title, link, postFactory);
+    addPost(title, link, postDataService);
 
     // blank these off so the UI is cleared
     $scope.title = '';
@@ -37,7 +42,7 @@ function mainController($scope, postFactory) {
   };
 
   $scope.app.incrementPostUpVotes = function (post) {
-    postFactory.upVote(post);
+    postDataService.upVote(post);
   };
 
 }
@@ -49,8 +54,10 @@ function stateConfig($stateProvider, $urlRouterProvider) {
     {
       // Ensure that anytime our home state is entered, we will automatically 
       // query all posts from our backend before the state actually finishes loading.
+      // 'postDataService' refers to the postFactory dependency we injected in the 
+      // app setup.
       resolve: {
-        postPromise: ['posts', function (posts) {
+        posts: ['postDataService', function (posts) {
           return posts.getAll();
         }]
       },
@@ -58,8 +65,16 @@ function stateConfig($stateProvider, $urlRouterProvider) {
       templateUrl: '/home.html',
       controller: 'MainController'
     })
-    .state('posts',
+    .state('postDataService',
     {
+        resolve: {
+        // use the id from the url and the posts factory we injected
+        // at the start to get the single post by id every time
+        // we enter the 'postDataService' state.
+        post: ['$stateParams','postDataService', function ($stateParams, posts) {
+          return posts.get($stateParams.id);
+        }]
+      },
       url: '/posts/{id}',
       templateUrl: '/posts.html',
       controller: 'PostsController'
@@ -68,9 +83,9 @@ function stateConfig($stateProvider, $urlRouterProvider) {
   $urlRouterProvider.otherwise('home');
 }
 
-function postFactory($http) {
+function postDataServiceImplementation($http) {
   // What we're doing here is creating a new object that has an array
-  // property called 'posts'. We then return that variable so that our
+  // property called 'postDataService'. We then return that variable so that our
   // o object essentially becomes exposed to any other Angular module 
   // that cares to inject it. You'll note that we could have simply 
   // exported the posts array directly, however, by exporting an object
@@ -81,11 +96,20 @@ function postFactory($http) {
   // **TODO: work out how to inject this
   var apiBaseUrl = 'http://localhost:3001';
 
-  // Get All
+  // Get All Posts
   o.getAll = function () {
     return $http.get(apiBaseUrl + '/posts')
       .success(function (data) {
         angular.copy(data, o.posts);
+      });
+  };
+
+  // Get single post
+  o.get = function (id) {
+    return $http.get(apiBaseUrl + '/posts/'+ id)
+      //.then because we are going to do a Promise
+      .then(function (response) {
+        return response.data;
       });
   };
 
