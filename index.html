@@ -3,121 +3,25 @@
 <head>
   <title>My Angular App!</title>
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-  <style> .glyphicon-thumbs-up { cursor:pointer } </style>
+  <style>
+    .glyphicon-thumbs-up {
+      cursor: pointer
+    }
+  </style>
+
+  
 </head>
 
-<body ng-app="flapperNews"> 
+<body ng-app="flapperNews">
   <div class="row">
     <div class="col-md-6 col-md-offset3">
-      <ui-view></ul-view>
-  </div>
-
-  <!--<script src="vendor/angular.js"></script>-->
-  <!--<script src="vendor/angular-ui-router.js"></script>-->
-  <script src="scripts/js/main.js"></script>
-
-  <!-- Home -->
-  <script type="text/ng-template" id="/home.html">
-    <div class="page-header">
-      <h1>Flapper News</h1>
+      <div ui-view></div>
     </div>
 
-  <!-- order by upvotes descending -->
-  <div ng-repeat="post in app.posts | orderBy: '-upvotes'">
-
-    <span class="glyphicon glyphicon-thumbs-up" 
-    ng-click="app.incrementPostUpVotes(post)">
-      {{post.upvotes}}
-    </span>
-
-    <span style="font-size:20px;margin-left:10px;">
-      <a ng-show="true" href="{{post.link}}">
-        {{post.title}}
-      </a>
-     
-      <span ng-hide="true">
-        {{post.title}}
-      </span>
-    </span><!-- style -->
-    <span>
-        <!--the MongoDb auto property is called "_id" rather than "id".-->
-        <!--<a href="#/posts/{{$index}}">Comments</a>-->
-        <a href="#/posts/{{post._id}}">Comments</a>
-    </span>
     
-
-  </div><!-- ng-repeat post -->
-
-    <!-- setting the model does the data binding -->
-    <form ng-submit="app.addPost(title, link)"
-      style="margin-top:30px;">
-      <h3>Add a new post</h1>
-      <div class="form-group">
-        <input 
-          class="form-control"
-          type="text" 
-          ng-model="title"
-          name="title"
-          placeholder="Title">
-        </input>
-      </div>
-      <div class="form-group">
-        <input 
-          class="form-control"
-          type="text" 
-          ng-model="link"
-          name ="link"
-          placeholder="Link">
-        </input>
-      </div>
-      <button 
-        class="btn btn-primary" 
-        type="submit">Post
-      </button>
-    </form>
-
-  </script>
-
-  <!-- Posts (details)-->
-  <script type="text/ng-template" id="/posts.html">
-  <div class="page-header">
-    <h3>
-      <a ng-show="post.link" ng-href="{{post.link}}">
-        {{post.title}}
-      </a>
-      <span ng-hide="post.link">
-        {{post.title}}
-      </span>
-     
-    </h3>
-  </div>
-
-  <div ng-repeat="comment in app.post.comments | orderBy:'-upvotes'">
-    <span class="glyphicon glyphicon-thumbs-up"
-      ng-click="app.incrementCommentUpVotes(app.post._id,comment)">
-    </span>
-    {{comment.upvotes}} - by {{comment.author}} 
-    <span style="font-size:20px; margin-left:10px;">
-      {{comment.body}}
-    </span>
-  </div>
-  <form ng-submit="app.addComment(app.post._id,body)"
-    style="margin-top:30px;">
-    <h3>Add a new comment</h3>
-
-    <div class="form-group">      
-      <input 
-        type="text"
-        class="form-control"
-        placeholder="Comment"
-        ng-model="body"
-        name=body>
-      </input>
-    </div>
-    <button type="submit" class="btn btn-primary">Post</button>
-  </form>
-
-</script> <!-- posts -->
+    <script src="scripts/js/main.js"></script>
+    <script src="vendor/jquery.min.js"></script>
+ 
 
 </body>
 

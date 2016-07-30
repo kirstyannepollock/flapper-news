@@ -15,7 +15,7 @@ function stateConfig($stateProvider, $urlRouterProvider) {
         }]
       },
       url: '/home',
-      templateUrl: '/home.html',
+      templateUrl: '/templates/home.html',
       controller: 'MainController'
     })
     .state('posts',
@@ -29,7 +29,7 @@ function stateConfig($stateProvider, $urlRouterProvider) {
         }]
       },
       url: '/posts/{id}',
-      templateUrl: '/posts.html',
+      templateUrl: '/templates/posts.html',
       controller: 'PostsController'
     });
 

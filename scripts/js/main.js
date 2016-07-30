@@ -1,7 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
-// //https://thinkster.io/angular-rails#angular-services
-// //https://omarfouad.com/
+// https://thinkster.io/angular-rails#angular-services
+// https://omarfouad.com/
+// https://scotch.io/tutorials/angular-routing-using-ui-router
 
 require('../vendor/angular.min');
 require('../vendor/angular-ui-router');
@@ -211,7 +212,7 @@ function stateConfig($stateProvider, $urlRouterProvider) {
         }]
       },
       url: '/home',
-      templateUrl: '/home.html',
+      templateUrl: '/templates/home.html',
       controller: 'MainController'
     })
     .state('posts',
@@ -225,7 +226,7 @@ function stateConfig($stateProvider, $urlRouterProvider) {
         }]
       },
       url: '/posts/{id}',
-      templateUrl: '/posts.html',
+      templateUrl: '/templates/posts.html',
       controller: 'PostsController'
     });
 

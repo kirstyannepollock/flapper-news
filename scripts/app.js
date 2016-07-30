@@ -1,6 +1,7 @@
 
-// //https://thinkster.io/angular-rails#angular-services
-// //https://omarfouad.com/
+// https://thinkster.io/angular-rails#angular-services
+// https://omarfouad.com/
+// https://scotch.io/tutorials/angular-routing-using-ui-router
 
 require('../vendor/angular.min');
 require('../vendor/angular-ui-router');
