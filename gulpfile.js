@@ -6,7 +6,7 @@ var jQueryBase = './bower_components/jquery/dist/';
 var jQueryMin = jQueryBase + 'jquery.min.js';
 
 var angularBase = './bower_components/angular/';
-var angularMin = angularBase + 'angular.min.js';
+var angularMin = angularBase + 'angular.js';
 
 var angularUiRouterBase = './bower_components/angular-ui-router/release/';
 var angularUi = angularUiRouterBase + 'angular-ui-router.js';
@@ -44,6 +44,36 @@ var onError = function(err)
 // });
 //==========================================
 
+// ==========================================
+// Browserify(requires, bundling)
+// ==========================================
+//https://omarfouad.com/
+
+var browserify = require('browserify');
+var source = require('vinyl-source-stream');
+
+//var browserifySrc = './scripts/**/*.js';
+var browserifySrc = './scripts/app.js';
+var browserifyDest = './scripts';
+
+gulp.task('browserify', function() {
+	// Grabs the app.js file
+    return browserify(browserifySrc)
+  // bundles it and creates a file called main.js
+        .bundle()
+        .pipe(source('main.js'))
+        // saves it the browserifyDestdirectory
+        .pipe(gulp.dest(browserifyDest));
+});
+
+//**TODO: add***
+
+gulp.task('watch', function() {
+	gulp.watch('scripts/app.js', ['browserify']);
+});
+
+// ==========================================
+
 gulp.task( 'bootstrap', function() 
 {
   return  gulp.src(bootstrapDist)
@@ -70,5 +100,5 @@ gulp.task( 'angular-ui-router', function()
             .pipe(gulp.dest(vendorDest) );
 });
 
-gulp.task( 'angular', ['angular', 'angular-ui-router'] );
+gulp.task( 'angular-all', ['angular', 'angular-ui-router'] );
 gulp.task( 'vendor', ['jquery', 'angular', 'bootstrap'] );
