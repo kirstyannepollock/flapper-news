@@ -18,7 +18,7 @@ function stateConfig($stateProvider, $urlRouterProvider) {
       templateUrl: '/home.html',
       controller: 'MainController'
     })
-    .state('postDataService',
+    .state('posts',
     {
       resolve: {
         // use the id from the url and the posts factory we injected
