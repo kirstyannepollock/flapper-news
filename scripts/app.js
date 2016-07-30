@@ -2,7 +2,7 @@
 // //https://thinkster.io/angular-rails#angular-services
 // //https://omarfouad.com/
 
-require('../vendor/angular');
+require('../vendor/angular.min');
 require('../vendor/angular-ui-router');
 
 var mainController = require("./controllers/main-controller").mainController;
