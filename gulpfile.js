@@ -68,8 +68,15 @@ gulp.task('browserify', function() {
 
 //**TODO: add***
 
+function swallowError (error) {
+  // If you want details of the error in the console
+  console.log(error.toString());
+  this.emit('end');
+}
+
 gulp.task('watch', function() {
-	gulp.watch('scripts/app.js', ['browserify']);
+	gulp.watch('scripts/app.js', ['browserify'])
+  .on('error', swallowError);
 });
 
 // ==========================================

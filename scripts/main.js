@@ -6,14 +6,13 @@
 require('../vendor/angular');
 require('../vendor/angular-ui-router');
 
-//
-
-// var mainController = require("./controllers/main-controller");
-// var postsController = require("./controllers/posts-controller");
-// var postDataServiceImplementation = require("./services/posts-data-service");
-//var stateConfig = require("./states/state-config");
+var mainController = require("./controllers/main-controller").mainController;
+var postsController = require("./controllers/posts-controller").postsController;
+var postDataServiceImplementation = require("./services/posts-data-service").postDataServiceImplementation;
+var stateConfig = require("./states/state-config").stateConfig;
 
 //ui-router is newer and provides more flexibility and features than ngRoute. 
+//**** VORSICHT!!!! Note the dependency NAME is 'ui.router' with a DOT not a DASH !!!
 angular.module('flapperNews', ['ui.router'])
 
   .config(['$stateProvider', '$urlRouterProvider', stateConfig])
@@ -31,7 +30,94 @@ angular.module('flapperNews', ['ui.router'])
 
 
 
-//===== postDataServiceImplementation ======//
+},{"../vendor/angular":7,"../vendor/angular-ui-router":6,"./controllers/main-controller":2,"./controllers/posts-controller":3,"./services/posts-data-service":4,"./states/state-config":5}],2:[function(require,module,exports){
+'use strict';
+
+//*****************
+// My idea right now is that controller know about scope, but not 
+// data services or their access functions. It's a foreboding of
+// decoupling concerns, I guess.
+//*****************
+
+function mainController($scope, postDataService) {
+
+  // holds all fns and vars that can be used in pages
+  $scope.app = {};
+  $scope.app.posts = postDataService.posts;
+
+  $scope.app.addPost = function (title, link) {
+    addPost(title, link, postDataService);
+
+    // blank these off so the UI is cleared
+    $scope.title = '';
+    $scope.link = '';
+  };
+
+  $scope.app.incrementPostUpVotes = function (post) {
+    postDataService.upVote(post);
+  };
+
+}
+
+function addPost(title, link, postDataService) {
+
+  if (!title || title === '') { return; }
+
+  postDataService.create({
+    title: title,
+    link: link,
+  });
+}
+
+module.exports.mainController = mainController;
+},{}],3:[function(require,module,exports){
+'use strict';
+
+//*****************
+// My idea right now is that controller know about scope, but not 
+// data services or their access functions. It's a foreboding of
+// decoupling concerns, I guess.
+//*****************
+
+function postsController($log, $scope, postDataService, post) {
+  // holds all fns and vars that can be used in pages
+  $scope.app = {};
+
+  // use the injected Promise to grab the post and associated information
+  $scope.app.post = post;
+
+  // add comment function
+  $scope.app.addComment = function (postId, body){
+    // on success, update our local data
+    addComment(postId, body, postDataService, function (comment) {
+      $scope.app.post.comments.push(comment);
+      //blank these off so the UI is cleared
+      $scope.body = '';
+    });
+  };
+
+  $scope.app.incrementCommentUpVotes = function (postId, comment) {
+    postDataService.upVoteComment(postId, comment);
+  };
+}
+
+
+function addComment(postId, body, postDataService, success) {
+  if (body === '') { return; }
+
+  var comment = {
+    body: body,
+    author: 'user',
+    upvotes: 0
+  };
+
+  postDataService.addComment(postId, comment)
+    .success( function (comment) {success(comment); } );
+}
+
+module.exports.postsController = postsController;
+},{}],4:[function(require,module,exports){
+'use strict';
 
 function postDataServiceImplementation($http, apiBaseUrl) {
   // What we're doing here is creating a new object that has an array
@@ -104,90 +190,12 @@ function createPostsMethods($http, apiBaseUrl, o) {
   };
 
 }
-//==========================================//
 
+module.exports.postDataServiceImplementation = postDataServiceImplementation;
 
+},{}],5:[function(require,module,exports){
+'use strict';
 
-//===== postsController ======//
-function postsController($log, $scope, postDataService, post) {
-  // holds all fns and vars that can be used in pages
-  $scope.app = {};
-
-  // use the injected Promise to grab the post and associated information
-  $scope.app.post = post;
-
-  // add comment function
-  $scope.app.addComment = function (postId, body){
-    // on success, update our local data
-    addComment(postId, body, postDataService, function (comment) {
-      $scope.app.post.comments.push(comment);
-      //blank these off so the UI is cleared
-      $scope.body = '';
-    });
-  };
-
-  $scope.app.incrementCommentUpVotes = function (postId, comment) {
-    postDataService.upVoteComment(postId, comment);
-  };
-}
-
-
-function addComment(postId, body, postDataService, success) {
-  if (body === '') { return; }
-
-  var comment = {
-    body: body,
-    author: 'user',
-    upvotes: 0
-  };
-
-  postDataService.addComment(postId, comment)
-    .success( function (comment) {success(comment); } );
-}
-
-//==========================================//
-
-
-
-//===== mainController ======//
-
-function mainController($scope, postDataService) {
-
-  // holds all fns and vars that can be used in pages
-  $scope.app = {};
-  $scope.app.posts = postDataService.posts;
-
-  $scope.app.addPost = function (title, link) {
-    addPost(title, link, postDataService);
-
-    // blank these off so the UI is cleared
-    $scope.title = '';
-    $scope.link = '';
-  };
-
-  $scope.app.incrementPostUpVotes = function (post) {
-    postDataService.upVote(post);
-  };
-
-}
-
-function addPost(title, link, postDataService) {
-
-  if (!title || title === '') { return; }
-
-  postDataService.create({
-    title: title,
-    link: link,
-  });
-}
-
-//==========================================//
-
-
-
-
-
-//============== state config =======//
 function stateConfig($stateProvider, $urlRouterProvider) {
 
   $stateProvider
@@ -223,18 +231,9 @@ function stateConfig($stateProvider, $urlRouterProvider) {
 
   $urlRouterProvider.otherwise('home');
 }
-//==========================
 
-
-
-// require('../vendor/angular');
-// var app = angular.module('app', []);
-
-// app.controller('MainController', function($scope) {
-// 	$scope.message = 'Angular Works!';
-// })
-
-},{"../vendor/angular":3,"../vendor/angular-ui-router":2}],2:[function(require,module,exports){
+module.exports.stateConfig = stateConfig;
+},{}],6:[function(require,module,exports){
 /**
  * State-based routing for AngularJS
  * @version v0.3.1
@@ -4811,7 +4810,7 @@ angular.module('ui.router.state')
   .filter('isState', $IsStateFilter)
   .filter('includedByState', $IncludedByStateFilter);
 })(window, window.angular);
-},{}],3:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * @license AngularJS v1.5.8
  * (c) 2010-2016 Google, Inc. http://angularjs.org
