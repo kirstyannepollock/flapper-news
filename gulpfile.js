@@ -52,13 +52,13 @@ var onError = function(err)
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 
-//var browserifySrc = './scripts/**/*.js';
-var browserifySrc = './scripts/app.js';
-var browserifyDest = './scripts';
+var browserifySrc = './scripts/**/*.js';
+//var browserifySrc = './scripts/app.js';
+var browserifyDest = './scripts/js';
 
 gulp.task('browserify', function() {
 	// Grabs the app.js file
-    return browserify(browserifySrc)
+    return browserify('./scripts/app.js')
   // bundles it and creates a file called main.js
         .bundle()
         .pipe(source('main.js'))
@@ -75,7 +75,7 @@ function swallowError (error) {
 }
 
 gulp.task('watch', function() {
-	gulp.watch('scripts/app.js', ['browserify'])
+	gulp.watch(browserifySrc, ['browserify'])
   .on('error', swallowError);
 });
 
