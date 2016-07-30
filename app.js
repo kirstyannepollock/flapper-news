@@ -35,18 +35,18 @@ function postsController($log, $scope, postDataService, post) {
     // on success, update our local data
     addComment(postId, body, postDataService, function (comment) {
       $scope.app.post.comments.push(comment);
+      
+      //blank these off so the UI is cleared
+      $scope.body = '';
     });
 
-
-    //blank these off so the UI is cleared
-    $scope.body = '';
   };
 
   $scope.app.incrementCommentUpVotes = function (postId, comment) {
     // //temp
-    // comment = $scope.app.comment;
-    // var id = comment._id;
-    postDataService.upVote(postId, comment);
+    
+    var id = postId;
+    postDataService.upVoteComment(postId, comment);
   };
 }
 
@@ -130,9 +130,7 @@ function createCommentMethods($http, apiBaseUrl, o) {
 
   // Upvote (Comment)
   o.upVoteComment = function (postId, comment) {
-    var f = comment;
-
-    return $http.post(apiBaseUrl + '/posts/' + postId + ' /comments/' + comment._id, 'vote-up')
+    return $http.post(apiBaseUrl + '/posts/' + postId + "/comments/" + comment._id + '/vote-up')
       .success(function (data) {
         comment.upvotes += 1;
       });
