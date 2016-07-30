@@ -1,5 +1,12 @@
 'use strict';
 
+//**********************************************************
+// Data service purely deals with data and is self-contained.
+// It doesn't know about scope, not should it. Purely makes
+// REST calls, and exposes simple friendly methods to enable
+// controllers to use them.
+//**********************************************************
+
 function postDataServiceImplementation($http, apiBaseUrl) {
   // What we're doing here is creating a new object that has an array
   // property called 'posts'. We then return that variable so that our

@@ -1,5 +1,8 @@
 'use strict';
-
+//**********************************************************
+// We are using ui-router. This state machine controls
+// which views are loaded based upon the app state
+//**********************************************************#
 function stateConfig($stateProvider, $urlRouterProvider) {
 
   $stateProvider

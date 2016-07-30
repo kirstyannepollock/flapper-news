@@ -3,7 +3,7 @@
 // https://thinkster.io/angular-rails#angular-services
 // https://omarfouad.com/
 // https://scotch.io/tutorials/angular-routing-using-ui-router
-
+//
 require('../vendor/angular.min');
 require('../vendor/angular-ui-router');
 
@@ -33,12 +33,10 @@ angular.module('flapperNews', ['ui.router'])
 
 },{"../vendor/angular-ui-router":6,"../vendor/angular.min":7,"./controllers/main-controller":2,"./controllers/posts-controller":3,"./services/posts-data-service":4,"./states/state-config":5}],2:[function(require,module,exports){
 'use strict';
-
-//*****************
-// My idea right now is that controller know about scope, but not 
-// data services or their access functions. It's a foreboding of
-// decoupling concerns, I guess.
-//*****************
+//**********************************************************
+// Controller knows about $scope and the data service and
+// functions as the link between them.
+//**********************************************************
 
 function mainController($scope, postDataService) {
 
@@ -74,11 +72,6 @@ module.exports.mainController = mainController;
 },{}],3:[function(require,module,exports){
 'use strict';
 
-//*****************
-// My idea right now is that controller know about scope, but not 
-// data services or their access functions. It's a foreboding of
-// decoupling concerns, I guess.
-//*****************
 
 function postsController($log, $scope, postDataService, post) {
   // holds all fns and vars that can be used in pages
@@ -119,6 +112,13 @@ function addComment(postId, body, postDataService, success) {
 module.exports.postsController = postsController;
 },{}],4:[function(require,module,exports){
 'use strict';
+
+//**********************************************************
+// Data service purely deals with data and is self-contained.
+// It doesn't know about scope, not should it. Purely makes
+// REST calls, and exposes simple friendly methods to enable
+// controllers to use them.
+//**********************************************************
 
 function postDataServiceImplementation($http, apiBaseUrl) {
   // What we're doing here is creating a new object that has an array
@@ -196,7 +196,10 @@ module.exports.postDataServiceImplementation = postDataServiceImplementation;
 
 },{}],5:[function(require,module,exports){
 'use strict';
-
+//**********************************************************
+// We are using ui-router. This state machine controls
+// which views are loaded based upon the app state
+//**********************************************************#
 function stateConfig($stateProvider, $urlRouterProvider) {
 
   $stateProvider

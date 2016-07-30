@@ -54,7 +54,7 @@ var source = require('vinyl-source-stream');
 
 var browserifySrc = './scripts/**/*.js';
 //var browserifySrc = './scripts/app.js';
-var browserifyDest = './scripts/js';
+var browserifyDest = './js';
 
 gulp.task('browserify', function() {
 	// Grabs the app.js file
@@ -65,8 +65,6 @@ gulp.task('browserify', function() {
         // saves it the browserifyDestdirectory
         .pipe(gulp.dest(browserifyDest));
 });
-
-//**TODO: add***
 
 function swallowError (error) {
   // If you want details of the error in the console

@@ -1,10 +1,8 @@
 'use strict';
-
-//*****************
-// My idea right now is that controller know about scope, but not 
-// data services or their access functions. It's a foreboding of
-// decoupling concerns, I guess.
-//*****************
+//**********************************************************
+// Controller knows about $scope and the data service and
+// functions as the link between them.
+//**********************************************************
 
 function mainController($scope, postDataService) {
 

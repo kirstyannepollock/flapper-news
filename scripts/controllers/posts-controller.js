@@ -1,10 +1,5 @@
 'use strict';
 
-//*****************
-// My idea right now is that controller know about scope, but not 
-// data services or their access functions. It's a foreboding of
-// decoupling concerns, I guess.
-//*****************
 
 function postsController($log, $scope, postDataService, post) {
   // holds all fns and vars that can be used in pages
